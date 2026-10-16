@@ -1,0 +1,10 @@
+{# Included on the order form, see Registrar::checkoutSection(). Gets "code"
+   (the one typed before, if a validation error sent the form back) from
+   the closure given there. A failed code's reason shows through the
+   order form's own generic error list, above this block - see
+   Modulento\Core\Controller\OrderController::place(). #}
+<div class="field">
+    <label for="coupon_code">{{ trans('coupons.checkout.label') }}</label>
+    <input id="coupon_code" name="coupon_code" type="text" maxlength="32" value="{{ code }}" autocomplete="off">
+    <small>{{ trans('coupons.checkout.hint') }}</small>
+</div>

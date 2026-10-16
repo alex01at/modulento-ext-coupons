@@ -1,0 +1,89 @@
+{% extends '@admin/layout.twig' %}
+
+{# The form of a coupon. Receives "coupon" (the stored row, or null when
+   creating - only used here for its id and used_count) and "values" (code,
+   type, value, currency, app_id, active, starts_at, expires_at, max_uses,
+   min_subtotal - always strings/bool, ready for the form, whether freshly
+   loaded or typed back after a failed validation), "errors" and "apps"
+   (id => name, every installed "app"-type extension - not every extension,
+   same convention Abos's plan editor uses). #}
+{% block title %}{{ trans('coupons.admin.title') }} – {{ site_name }}{% endblock %}
+
+{% block admin %}
+{% include '@admin/_page_header.twig' with {
+    heading: coupon ? trans('coupons.admin.edit') : trans('coupons.admin.new'),
+    crumbs: [{label: trans('coupons.admin.title'), path: '/admin/coupons'}]
+} only %}
+
+{% for error in errors %}
+    <p class="flash flash-error" role="alert">{{ error }}</p>
+{% endfor %}
+
+<form method="post" action="{{ url(coupon ? '/admin/coupons/' ~ coupon.id : '/admin/coupons/new') }}" class="card-box field-grid">
+    {{ csrf_field() }}
+
+    <div class="field">
+        <label for="code">{{ trans('coupons.admin.field.code') }}</label>
+        <input id="code" name="code" value="{{ values.code }}" maxlength="32" required placeholder="SOMMER10">
+    </div>
+    <div class="field">
+        <label for="type">{{ trans('coupons.admin.field.type') }}</label>
+        <select id="type" name="type">
+            <option value="percent" {{ values.type == 'percent' ? 'selected' }}>{{ trans('coupons.type.percent') }}</option>
+            <option value="fixed" {{ values.type == 'fixed' ? 'selected' }}>{{ trans('coupons.type.fixed') }}</option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="value">{{ trans('coupons.admin.field.value') }}</label>
+        <input id="value" name="value" value="{{ values.value }}" inputmode="decimal" required>
+        <small>{{ trans('coupons.admin.field.value_hint') }}</small>
+    </div>
+    <div class="field">
+        <label for="currency">{{ trans('coupons.admin.field.currency') }}</label>
+        <input id="currency" name="currency" value="{{ values.currency }}" maxlength="3" required>
+        <small>{{ trans('coupons.admin.field.currency_hint') }}</small>
+    </div>
+    <div class="field">
+        <label for="app_id">{{ trans('coupons.admin.field.app') }}</label>
+        <select id="app_id" name="app_id">
+            <option value="" {{ values.app_id is null ? 'selected' }}>{{ trans('coupons.admin.general') }}</option>
+            {% for id, name in apps %}
+                <option value="{{ id }}" {{ values.app_id == id ? 'selected' }}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <small>{{ trans('coupons.admin.field.app_hint') }}</small>
+    </div>
+    <div class="field">
+        <label for="starts_at">{{ trans('coupons.admin.field.starts_at') }}</label>
+        <input id="starts_at" name="starts_at" type="date" value="{{ values.starts_at }}">
+    </div>
+    <div class="field">
+        <label for="expires_at">{{ trans('coupons.admin.field.expires_at') }}</label>
+        <input id="expires_at" name="expires_at" type="date" value="{{ values.expires_at }}">
+    </div>
+    <div class="field">
+        <label for="max_uses">{{ trans('coupons.admin.field.max_uses') }}</label>
+        <input id="max_uses" name="max_uses" type="number" min="1" value="{{ values.max_uses }}">
+        {% if coupon %}<small>{{ trans('coupons.admin.field.used_so_far', {count: coupon.used_count}) }}</small>{% endif %}
+    </div>
+    <div class="field">
+        <label for="min_subtotal">{{ trans('coupons.admin.field.min_subtotal') }}</label>
+        <input id="min_subtotal" name="min_subtotal" value="{{ values.min_subtotal }}" inputmode="decimal">
+    </div>
+    <div class="field">
+        <label><input type="checkbox" name="active" value="1" {{ values.active ? 'checked' }}> {{ trans('coupons.admin.field.active') }}</label>
+    </div>
+
+    <button type="submit">{{ trans('coupons.admin.save') }}</button>
+</form>
+
+{% if coupon %}
+    <section class="card-box">
+        <form method="post" action="{{ url('/admin/coupons/' ~ coupon.id ~ '/delete') }}" class="danger-form">
+            {{ csrf_field() }}
+            <p><small>{{ trans('coupons.admin.delete_hint') }}</small></p>
+            <button type="submit" class="danger">{{ trans('coupons.admin.delete') }}</button>
+        </form>
+    </section>
+{% endif %}
+{% endblock %}

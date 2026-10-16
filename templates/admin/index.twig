@@ -1,0 +1,47 @@
+{% extends '@admin/layout.twig' %}
+{% import '@admin/_icons.twig' as icons %}
+
+{# Every coupon, any app, active or not. Receives "coupons" and "apps" (id => name). #}
+{% block title %}{{ trans('coupons.admin.title') }} – {{ site_name }}{% endblock %}
+
+{% block admin %}
+{% include '@admin/_page_header.twig' with {heading: trans('coupons.admin.title')} only %}
+
+<section class="card-box">
+    <div class="card-head">
+        <a class="btn" href="{{ url('/admin/coupons/new') }}">{{ icons.icon('plus') }}<span>{{ trans('coupons.admin.new') }}</span></a>
+    </div>
+
+    {% if coupons is empty %}
+        <p class="empty">{{ trans('coupons.admin.none') }}</p>
+    {% else %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col">{{ trans('coupons.admin.field.code') }}</th>
+                    <th scope="col">{{ trans('coupons.admin.field.value') }}</th>
+                    <th scope="col">{{ trans('coupons.admin.field.app') }}</th>
+                    <th scope="col">{{ trans('coupons.admin.field.used') }}</th>
+                    <th scope="col">{{ trans('coupons.admin.field.dates') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for coupon in coupons %}
+                    <tr>
+                        <th scope="row">
+                            <a href="{{ url('/admin/coupons/' ~ coupon.id) }}">{{ coupon.code }}</a>
+                            {% if not coupon.active %}<span class="badge">{{ trans('coupons.admin.inactive') }}</span>{% endif %}
+                        </th>
+                        <td>{{ coupon.type == 'percent' ? coupon.value ~ ' %' : money(coupon.value, coupon.currency) }}</td>
+                        <td>{{ coupon.app_id ? (apps[coupon.app_id] ?? coupon.app_id) : trans('coupons.admin.general') }}</td>
+                        <td>{{ coupon.used_count }}{% if coupon.max_uses %} / {{ coupon.max_uses }}{% endif %}</td>
+                        <td>{{ coupon.starts_at ? coupon.starts_at|slice(0, 10) : '…' }} – {{ coupon.expires_at ? coupon.expires_at|slice(0, 10) : '…' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
