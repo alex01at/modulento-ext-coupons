@@ -1,8 +1,9 @@
 {
     "id": "coupons",
     "name": "Coupons",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "api": 1,
     "type": "addon",
+    "description": "Adds admin-managed discount codes: percentage or fixed amount, usage limits, a date range and a minimum order total.",
     "namespace": "Modulento\\Coupons"
 }
